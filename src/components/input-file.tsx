@@ -7,10 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function InputFile() {
 	const [dragActive, setDragActive] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
+	const router = useRouter();
 
 	const handleDrag = (e: React.DragEvent) => {
 		e.preventDefault();
@@ -32,32 +34,31 @@ export function InputFile() {
 		}
 	};
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]; // Get the file
+	const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0]; // Get the file
 
-    if (!file) {
-        console.error("No file selected!");
-        return;
-    }
+		if (!file) {
+			console.error("No file selected!");
+			return;
+		}
 
-    const filePath = `files/${file.name}`;
+		const filePath = `files/${file.name}`;
 
-    const { data, error } = await supabase.storage
-        .from("datasets1") // Change to your bucket name
-        .upload(filePath, file, {
-            cacheControl: "3600",
-            upsert: false,
-        });
+		const { data, error } = await supabase.storage
+			.from("datasets") // Change to your bucket name
+			.upload(filePath, file, {
+				cacheControl: "3600",
+				upsert: false,
+			});
 
-    if (error) {
-        console.error("Upload error:", error.message);
-    } else {
-        console.log("File uploaded successfully:", data);
-    }
-};
+		if (error) {
+			console.error("Upload error:", error.message);
+		} else {
+			console.log("File uploaded successfully:", data);
+		}
 
-
-
+		router.push("/data-preview");
+	};
 
 	const onButtonClick = () => {
 		inputRef.current?.click();
