@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 type DatasetRow = Record<string, string>;
 
-export default function DatasetViewer() {
+export default function DatasetViewer1() {
 	const [dataset, setDataset] = useState<DatasetRow[]>([]);
 
 	useEffect(() => {

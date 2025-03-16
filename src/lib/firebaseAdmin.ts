@@ -5,10 +5,10 @@ import { getFirestore } from "firebase-admin/firestore";
 // Load service account key
 const serviceAccount = require("backend/serviceAccountKey.json");
 
-if (!getApps().length) {
-	initializeApp({
+if (!admin.apps.length) {
+	admin.initializeApp({
 		credential: admin.credential.cert(serviceAccount),
 	});
 }
 
-export const db = getFirestore();
+export const db = admin.firestore();
