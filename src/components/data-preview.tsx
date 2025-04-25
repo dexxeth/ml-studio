@@ -31,8 +31,6 @@ import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/navbar";
 import { useRouter } from "next/navigation";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebaseConfig";
 
 interface Dataset {
 	columns: string[];
@@ -49,68 +47,46 @@ export default function DatasetPreview() {
 
 	const rowsPerPage = 10;
 
-	//   useEffect(() => {
-	//     // Load dataset from localStorage
-	//     const storedDataset = localStorage.getItem("dataset")
-	//     const storedDatasetName = localStorage.getItem("datasetName")
-
-	//     if (!storedDataset) {
-	//       router.push("/upload")
-	//       return
-	//     }
-
-	//     try {
-	//       const parsedDataset = JSON.parse(storedDataset) as Dataset
-	//       setDataset(parsedDataset)
-	//       setDatasetName(storedDatasetName || "Unnamed Dataset")
-	//     } catch (error) {
-	//       console.error("Error parsing dataset:", error)
-	//       router.push("/upload")
-	//     }
-
-	//     setLoading(false)
-	//   }, [router])
 
 	useEffect(() => {
 		const fetchDataset = async () => {
 			try {
-				const querySnapshot = await getDocs(collection(db, "datasets"));
-				if (!querySnapshot.empty) {
-					const rawData = querySnapshot.docs.map((doc) => doc.data());
-
-					if (!Array.isArray(rawData) || rawData.length === 0) {
-						console.error("Invalid dataset structure:", rawData);
-						return;
-					}
-
-					// Extract column names dynamically
-					const columns = Object.keys(rawData[0]);
-
-					// Convert object array into a 2D array
-					const data = rawData.map((row) =>
-						columns.map((col) => {
-							const value = row[col];
-							return typeof value === "number" || !isNaN(Number(value))
-								? Number(value)
-								: String(value ?? "-");
-						})
-					);
-
-					setDataset({ columns, data });
-					// setFilteredRows(data);
-					// calculateStatistics(columns, data);
-				} else {
-					console.warn("No dataset found in Firestore.");
+				const response = await fetch("http://127.0.0.1:8000/dataset");
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error("Error response:", errorText);
+					return;
 				}
+				const result = await response.json();
+	
+				if (!Array.isArray(result.dataset)) {
+					console.error("Invalid dataset structure:", result);
+					return;
+				}
+	
+				const columns = Object.keys(result.dataset[0]);
+				const data = result.dataset.map((row) =>
+					columns.map((col) => {
+						const value = row[col];
+						return typeof value === "number" || !isNaN(Number(value))
+							? Number(value)
+							: String(value ?? "-");
+					})
+				);
+	
+				setDataset({ columns, data });
 			} catch (error) {
 				console.error("Error fetching dataset:", error);
 			} finally {
 				setLoading(false);
 			}
 		};
-
+	
 		fetchDataset();
 	}, []);
+	
+	
+	
 
 	if (loading || !dataset) {
 		return (
@@ -205,7 +181,7 @@ export default function DatasetPreview() {
 					<Card className="mb-8 border-border/40 bg-card/50 backdrop-blur-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
-								<FileSpreadsheet className="h-5 w-5" />
+								<FileSpreadsheet className="h-5 w-5"/>
 								Dataset Preview
 							</CardTitle>
 							<CardDescription>
@@ -383,22 +359,22 @@ export default function DatasetPreview() {
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.min.toFixed(2)
+													? (stat.min ?? 0).toFixed(2)
 													: "-"}
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.max.toFixed(2)
+													? (stat.max ?? 0).toFixed(2)
 													: "-"}
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.mean.toFixed(2)
+													? (stat.mean ?? 0).toFixed(2)
 													: "-"}
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.stdDev.toFixed(2)
+													? (stat.stdDev ?? 0).toFixed(2)
 													: "-"}
 											</TableCell>
 										</TableRow>
