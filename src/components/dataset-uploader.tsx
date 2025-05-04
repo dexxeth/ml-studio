@@ -25,13 +25,13 @@ export default function DatasetUploader() {
 		const selectedFile = e.target.files?.[0];
 		if (!selectedFile) return;
 
-		const allowedExtensions = [".csv"];
+		const allowedExtensions = [".csv", ".xlsx"];
 		const fileExtension = selectedFile.name
 			.slice(selectedFile.name.lastIndexOf("."))
 			.toLowerCase();
 
 		if (!allowedExtensions.includes(fileExtension)) {
-			setError("Please upload a CSV file (.csv)");
+			setError("Please upload a .csv or .xlsx file");
 			setFile(null);
 			return;
 		}
@@ -47,54 +47,28 @@ export default function DatasetUploader() {
 		setUploading(true);
 		setError(null);
 
-		const reader = new FileReader();
-		reader.onload = async (e) => {
-			const text = e?.target?.result as string;
-			if (!text) return;
+		const formData = new FormData();
+		formData.append("file", file);
 
-			try {
-				const rows = text
-					.trim()
-					.split("\n")
-					.map((row) =>
-						row
-							.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-							.map((val) => val.trim().replace(/^"|"$/g, ""))
-					);
+		try {
+			const response = await fetch("http://127.0.0.1:8000/upload", {
+				method: "POST",
+				body: formData,
+			});
+			const result = await response.json();
 
-				const keys = rows[0];
-				const dataset = rows.slice(1).map((row) => {
-					let obj: Record<string, string> = {};
-					row.forEach((value, index) => {
-						obj[keys[index] || `Column${index + 1}`] =
-							value || "N/A";
-					});
-					return obj;
-				});
-
-				const jsonString = JSON.stringify({ dataset });
-
-				const response = await fetch(
-					"http://127.0.0.1:5000/uploadDataset",
-					{
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: jsonString,
-					}
-				);
-
-				const result = await response.json();
+			if (response.ok) {
 				alert(result.message);
 				router.push("/dataset");
-			} catch (err) {
-				setError("Error parsing dataset. Please check CSV formatting.");
-				console.error("Upload Error:", err);
-			} finally {
-				setUploading(false);
+			} else {
+				setError(result.error || "Upload failed");
 			}
-		};
-
-		reader.readAsText(file);
+		} catch (err) {
+			setError("Upload error");
+			console.error(err);
+		} finally {
+			setUploading(false);
+		}
 	};
 
 	return (
@@ -109,7 +83,7 @@ export default function DatasetUploader() {
 						<CardHeader>
 							<CardTitle>Upload your dataset</CardTitle>
 							<CardDescription>
-								Upload a CSV file containing your data
+								Upload a CSV or Excel file containing your data
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -117,14 +91,14 @@ export default function DatasetUploader() {
 								<div className="grid w-full items-center gap-6">
 									<div className="flex flex-col space-y-1.5">
 										<Label htmlFor="file">
-											Dataset File (CSV)
+											Dataset File (.csv or .xlsx)
 										</Label>
 										<div className="flex flex-col items-center gap-3">
 											<div className="border border-dashed border-border rounded-lg p-8 w-full text-center cursor-pointer hover:bg-muted/50 transition-colors">
 												<Input
 													id="file"
 													type="file"
-													accept=".csv"
+													accept=".csv,.xlsx"
 													className="hidden"
 													onChange={handleFileChange}
 												/>
@@ -139,7 +113,7 @@ export default function DatasetUploader() {
 													<span className="text-sm text-muted-foreground">
 														{file
 															? file.name
-															: "Click to upload or drag & drop a CSV file"}
+															: "Click to upload or drag & drop a CSV/Excel file"}
 													</span>
 												</Label>
 											</div>
