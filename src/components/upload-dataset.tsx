@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Upload, FileJson } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 
-export default function DatasetUploader() {
+export default function UploadDatasetComponent() {
 	const [file, setFile] = useState<File | null>(null);
 	const [uploading, setUploading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -59,7 +59,7 @@ export default function DatasetUploader() {
 
 			if (response.ok) {
 				alert(result.message);
-				router.push("/dataset");
+				router.push(`/preview-dataset?collection=${result.raw_collection}`);
 			} else {
 				setError(result.error || "Upload failed");
 			}

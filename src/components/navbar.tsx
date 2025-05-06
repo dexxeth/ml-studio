@@ -13,15 +13,15 @@ const routes = [
     label: "Home",
   },
   {
-    href: "/upload",
+    href: "/upload-dataset",
     label: "Upload Dataset",
   },
   {
-    href: "/dataset",
-    label: "Dataset",
+    href: "/preview-dataset",
+    label: "Preview Dataset",
   },
   {
-    href: "/features",
+    href: "/feature-selection",
     label: "Feature Selection",
   },
   {

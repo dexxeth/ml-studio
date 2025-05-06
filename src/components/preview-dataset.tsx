@@ -30,63 +30,67 @@ import { ArrowRight, BarChart2, FileSpreadsheet, Filter } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/navbar";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 interface Dataset {
 	columns: string[];
 	data: any[][];
 }
 
-export default function DatasetPreview() {
+export default function PreviewDataset() {
 	const [dataset, setDataset] = useState<Dataset | null>(null);
 	const [datasetName, setDatasetName] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [loading, setLoading] = useState(true);
-	const router = useRouter();
-
 	const rowsPerPage = 10;
-
+	const searchParams = useSearchParams();
+	const collection = searchParams?.get("collection");
 
 	useEffect(() => {
-		const fetchDataset = async () => {
+		const fetchDataset = async (collectionName: string) => {
 			try {
-				const response = await fetch("http://127.0.0.1:8000/dataset");
+				setLoading(true)
+				const response = await fetch(
+					`http://127.0.0.1:8000/dataset/${collectionName}`
+				);
 				if (!response.ok) {
 					const errorText = await response.text();
 					console.error("Error response:", errorText);
 					return;
 				}
 				const result = await response.json();
-	
-				if (!Array.isArray(result.dataset)) {
+				console.log("Fetched data:", result);
+
+				if (!Array.isArray(result?.dataset)) {
 					console.error("Invalid dataset structure:", result);
 					return;
 				}
-	
+
 				const columns = Object.keys(result.dataset[0]);
-				const data = result.dataset.map((row) =>
+				const data = result.dataset.map((row: Record<string, any>) =>
 					columns.map((col) => {
 						const value = row[col];
-						return typeof value === "number" || !isNaN(Number(value))
+						return typeof value === "number" ||
+							!isNaN(Number(value))
 							? Number(value)
 							: String(value ?? "-");
 					})
 				);
-	
+
 				setDataset({ columns, data });
+				setDatasetName(collectionName)
 			} catch (error) {
 				console.error("Error fetching dataset:", error);
 			} finally {
 				setLoading(false);
 			}
 		};
-	
-		fetchDataset();
-	}, []);
-	
-	
-	
+
+		if (collection) {
+			fetchDataset(collection as string);
+		}
+	}, [collection]);
 
 	if (loading || !dataset) {
 		return (
@@ -170,7 +174,7 @@ export default function DatasetPreview() {
 								{dataset.columns.length} columns
 							</p>
 						</div>
-						<Link href="/features">
+						<Link href={`/features-selection?collection=${collection}`}>
 							<Button>
 								Continue to Feature Selection{" "}
 								<ArrowRight className="ml-2 h-4 w-4" />
@@ -181,7 +185,7 @@ export default function DatasetPreview() {
 					<Card className="mb-8 border-border/40 bg-card/50 backdrop-blur-sm">
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
-								<FileSpreadsheet className="h-5 w-5"/>
+								<FileSpreadsheet className="h-5 w-5" />
 								Dataset Preview
 							</CardTitle>
 							<CardDescription>
@@ -314,7 +318,7 @@ export default function DatasetPreview() {
 								{filteredRows.length} rows
 							</div>
 							<div className="flex gap-2">
-								<Link href="/features">
+								<Link href={`/features-selection?collection=${collection}`}>
 									<Button>
 										Feature Selection{" "}
 										<ArrowRight className="ml-1 h-3 w-3" />
@@ -369,12 +373,16 @@ export default function DatasetPreview() {
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? (stat.mean ?? 0).toFixed(2)
+													? (stat.mean ?? 0).toFixed(
+															2
+													  )
 													: "-"}
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? (stat.stdDev ?? 0).toFixed(2)
+													? (
+															stat.stdDev ?? 0
+													  ).toFixed(2)
 													: "-"}
 											</TableCell>
 										</TableRow>
