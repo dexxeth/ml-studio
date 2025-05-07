@@ -1,11 +1,11 @@
-import DatasetUploader from "@/components/dataset-uploader";
+import UploadDatasetComponent from "@/components/upload-dataset";
 
 import React from "react";
 
 const UploadPage = () => {
 	return (
 		<div>
-			<DatasetUploader />
+			<UploadDatasetComponent />
 		</div>
 	);
 };

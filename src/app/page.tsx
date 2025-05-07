@@ -1,4 +1,4 @@
-import Features from "@/components/features";
+import Features from "@/components/app-features";
 import GetStartedButton from "@/components/get-started-button";
 import { BrainCircuit } from "lucide-react";
 

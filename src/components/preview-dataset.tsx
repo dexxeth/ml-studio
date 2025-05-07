@@ -30,44 +30,67 @@ import { ArrowRight, BarChart2, FileSpreadsheet, Filter } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/navbar";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 interface Dataset {
 	columns: string[];
 	data: any[][];
 }
 
-export default function DatasetPage() {
+export default function PreviewDataset() {
 	const [dataset, setDataset] = useState<Dataset | null>(null);
 	const [datasetName, setDatasetName] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [loading, setLoading] = useState(true);
-	const router = useRouter();
-
 	const rowsPerPage = 10;
+	const searchParams = useSearchParams();
+	const collection = searchParams?.get("collection");
 
 	useEffect(() => {
-		// Load dataset from localStorage
-		const storedDataset = localStorage.getItem("dataset");
-		const storedDatasetName = localStorage.getItem("datasetName");
+		const fetchDataset = async (collectionName: string) => {
+			try {
+				setLoading(true)
+				const response = await fetch(
+					`http://127.0.0.1:8000/dataset/${collectionName}`
+				);
+				if (!response.ok) {
+					const errorText = await response.text();
+					console.error("Error response:", errorText);
+					return;
+				}
+				const result = await response.json();
+				console.log("Fetched data:", result);
 
-		if (!storedDataset) {
-			router.push("/upload");
-			return;
+				if (!Array.isArray(result?.dataset)) {
+					console.error("Invalid dataset structure:", result);
+					return;
+				}
+
+				const columns = Object.keys(result.dataset[0]);
+				const data = result.dataset.map((row: Record<string, any>) =>
+					columns.map((col) => {
+						const value = row[col];
+						return typeof value === "number" ||
+							!isNaN(Number(value))
+							? Number(value)
+							: String(value ?? "-");
+					})
+				);
+
+				setDataset({ columns, data });
+				setDatasetName(collectionName)
+			} catch (error) {
+				console.error("Error fetching dataset:", error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		if (collection) {
+			fetchDataset(collection as string);
 		}
-
-		try {
-			const parsedDataset = JSON.parse(storedDataset) as Dataset;
-			setDataset(parsedDataset);
-			setDatasetName(storedDatasetName || "Unnamed Dataset");
-		} catch (error) {
-			console.error("Error parsing dataset:", error);
-			router.push("/upload");
-		}
-
-		setLoading(false);
-	}, [router]);
+	}, [collection]);
 
 	if (loading || !dataset) {
 		return (
@@ -151,7 +174,7 @@ export default function DatasetPage() {
 								{dataset.columns.length} columns
 							</p>
 						</div>
-						<Link href="/features">
+						<Link href={`/features-selection?collection=${collection}`}>
 							<Button>
 								Continue to Feature Selection{" "}
 								<ArrowRight className="ml-2 h-4 w-4" />
@@ -295,7 +318,7 @@ export default function DatasetPage() {
 								{filteredRows.length} rows
 							</div>
 							<div className="flex gap-2">
-								<Link href="/features">
+								<Link href={`/features-selection?collection=${collection}`}>
 									<Button>
 										Feature Selection{" "}
 										<ArrowRight className="ml-1 h-3 w-3" />
@@ -340,22 +363,26 @@ export default function DatasetPage() {
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.min.toFixed(2)
+													? (stat.min ?? 0).toFixed(2)
 													: "-"}
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.max.toFixed(2)
+													? (stat.max ?? 0).toFixed(2)
 													: "-"}
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.mean.toFixed(2)
+													? (stat.mean ?? 0).toFixed(
+															2
+													  )
 													: "-"}
 											</TableCell>
 											<TableCell>
 												{stat.isNumerical
-													? stat.stdDev.toFixed(2)
+													? (
+															stat.stdDev ?? 0
+													  ).toFixed(2)
 													: "-"}
 											</TableCell>
 										</TableRow>
