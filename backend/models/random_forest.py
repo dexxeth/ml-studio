@@ -49,6 +49,7 @@ def train_random_forest(collection_name: str, target_column: str = None, n_estim
     r2 = float(r2_score(y_test, y_pred))
     mae = float(mean_absolute_error(y_test, y_pred))
     accuracy = float(calculate_accuracy(y_test, y_pred))
+    confusion_matrix = float(np.mean(y_test == y_pred))
     
 
     # Save model using GridFS
@@ -58,6 +59,7 @@ def train_random_forest(collection_name: str, target_column: str = None, n_estim
         "mae": mae,
         "accuracy": accuracy,
         "feature_importance": model.feature_importances_.tolist(),
+        "confusion_matrix": confusion_matrix.tolist() if hasattr(confusion_matrix, 'tolist') else confusion_matrix
     }
 
     file_id, filename = save_model(model, "random_forest", metrics)

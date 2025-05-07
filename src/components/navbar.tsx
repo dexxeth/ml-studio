@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { BrainCircuit, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -8,30 +7,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 
 const routes = [
-  {
-    href: "/",
-    label: "Home",
-  },
-  {
-    href: "/upload-dataset",
-    label: "Upload Dataset",
-  },
-  {
-    href: "/preview-dataset",
-    label: "Preview Dataset",
-  },
-  {
-    href: "/feature-selection",
-    label: "Feature Selection",
-  },
-  {
-    href: "/training",
-    label: "Model Training",
-  },
-  {
-    href: "/models",
-    label: "Saved Models",
-  },
+  { href: "/", label: "Home" },
+  { href: "/upload-dataset", label: "Upload Dataset" },
+  { href: "/preview-dataset", label: "Preview Dataset" },
+  { href: "/feature-selection", label: "Feature Selection" },
+  { href: "/training", label: "Model Training" },
+  { href: "/models", label: "Saved Models" },
 ]
 
 export function Navbar() {
@@ -40,24 +21,27 @@ export function Navbar() {
   return (
     <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center px-4 container mx-auto">
-        <Link href="/" className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <BrainCircuit className="h-6 w-6" />
           <span className="font-bold text-xl">ML Studio</span>
-        </Link>
+        </div>
+
         <nav className="hidden md:flex items-center space-x-6 ml-10">
           {routes.map((route) => (
-            <Link
+            <span
               key={route.href}
-              href={route.href}
               className={cn(
-                "text-sm font-medium transition-colors hover:text-primary",
-                pathname === route.href ? "text-foreground" : "text-muted-foreground",
+                "text-sm font-medium transition-colors",
+                pathname === route.href
+                  ? "text-foreground font-semibold"
+                  : "text-muted-foreground"
               )}
             >
               {route.label}
-            </Link>
+            </span>
           ))}
         </nav>
+
         <div className="flex items-center ml-auto">
           <Sheet>
             <SheetTrigger asChild>
@@ -67,22 +51,23 @@ export function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left">
-              <Link href="/" className="flex items-center gap-2 mb-8">
+              <div className="flex items-center gap-2 mb-8">
                 <BrainCircuit className="h-6 w-6" />
                 <span className="font-bold text-xl">ML Studio</span>
-              </Link>
+              </div>
               <nav className="flex flex-col space-y-4">
                 {routes.map((route) => (
-                  <Link
+                  <span
                     key={route.href}
-                    href={route.href}
                     className={cn(
-                      "text-sm font-medium transition-colors hover:text-primary",
-                      pathname === route.href ? "text-foreground" : "text-muted-foreground",
+                      "text-sm font-medium transition-colors",
+                      pathname === route.href
+                        ? "text-foreground font-semibold"
+                        : "text-muted-foreground"
                     )}
                   >
                     {route.label}
-                  </Link>
+                  </span>
                 ))}
               </nav>
             </SheetContent>
@@ -92,4 +77,3 @@ export function Navbar() {
     </div>
   )
 }
-

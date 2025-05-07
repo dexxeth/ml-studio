@@ -12,6 +12,7 @@ def download_model(file_id: str):
         file = fs.get(ObjectId(file_id))
         content = file.read()
         filename = file.filename or "model.pkl"
+        if not filename.endswith(".pkl"): filename += ".pkl"
 
         return Response(
             content=content,

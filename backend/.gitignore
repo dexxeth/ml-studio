@@ -1,2 +1,10 @@
-.env
-__pycache__
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.log
+*.db
+*.sqlite3
+*.egg-info/
+*.env

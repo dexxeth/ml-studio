@@ -17,7 +17,6 @@ class TrainRequest(BaseModel):
     collection_name: str
     model_type: str
     auto_model_selection: bool
-    cross_validation: bool
 
 
 @router.post("/train-model")
@@ -47,7 +46,6 @@ async def train_model(request: TrainRequest):
             result = select_best_model(
                 request.collection_name,
                 test_size=0.2,
-                cross_validation=request.cross_validation
             )
             model_name = result["best_model"]
         else:
@@ -55,9 +53,9 @@ async def train_model(request: TrainRequest):
             if model_name == "random_forest":
                 result = train_random_forest(request.collection_name, target)
             elif model_name == "svm":
-                result = train_svm(request.collection_name, request.cross_validation)
+                result = train_svm(request.collection_name)
             elif model_name == "linear_regression":
-                result = train_linear_regression(request.collection_name, request.cross_validation)
+                result = train_linear_regression(request.collection_name)
             elif model_name == "k_means":
                 result = train_kmeans(request.collection_name)
             else:
@@ -68,13 +66,11 @@ async def train_model(request: TrainRequest):
             "model_type": model_name,
             "file_id": str(result.get("file_id")),
             "filename": result.get("filename"),
-            "cross_validation_score": result.get("cross_validation_score"),
             "metrics": {
                 "rmse": result.get("rmse"),
                 "mae": result.get("mae"),
                 "r2": result.get("r2"),
-                "accuracy": result.get("accuracy"),
-                "feature_importance": result.get("feature_importance")
+                "accuracy": result.get("accuracy")
             }
         }
 

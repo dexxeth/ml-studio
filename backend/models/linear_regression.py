@@ -7,6 +7,7 @@ from sklearn.metrics import (
 )
 from utils.save_model import save_model
 
+
 def train_linear_regression(X, y, cross_validation=False):
     model = LinearRegression()
 
@@ -27,12 +28,7 @@ def train_linear_regression(X, y, cross_validation=False):
         "rmse": float(np.sqrt(mean_squared_error(y_true, y_pred))),
         "r2": float(r2_score(y_true, y_pred)),
         "mae": float(mean_absolute_error(y_true, y_pred)),
-        "accuracy": None,
-        "precision": None,
-        "recall": None,
-        "f1_score": None,
-        "confusion_matrix": None,
-        "feature_importance": None
+        "accuracy": float(accuracy_score(y_true, y_pred)),
     }
 
     if is_binary_classification:

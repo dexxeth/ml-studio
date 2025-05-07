@@ -11,8 +11,8 @@ def save_model(model, model_name: str, metrics: dict):
     pickle.dump(model, buffer)
     buffer.seek(0)
 
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_id = fs.put(buffer, filename=f"{model_name}_{timestamp}_pkl")
+    timestamp = datetime.now().strftime("%d%m%Y_%H%M%S")
+    file_id = fs.put(buffer, filename=f"{model_name}_{timestamp}")
 
     model_collection = db[f"trained_model_{timestamp}"]
     model_collection.insert_one({
@@ -22,4 +22,4 @@ def save_model(model, model_name: str, metrics: dict):
         **metrics
     })
 
-    return str(file_id), f"{model_name}_{timestamp}_pkl"
+    return str(file_id), f"{model_name}_{timestamp}"
