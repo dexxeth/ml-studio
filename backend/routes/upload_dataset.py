@@ -8,6 +8,7 @@ from database.mongo import db
 
 router = APIRouter()
 
+
 @router.post("/upload")
 async def upload_dataset(file: UploadFile = File(...)):
     content = await file.read()
@@ -26,20 +27,11 @@ async def upload_dataset(file: UploadFile = File(...)):
     uploaded_filename = file.filename
     timestamp = datetime.now().strftime("%d%m%Y_%H%M%S")
 
-    records = df.to_dict(orient="records")
-
-    # enriched_records = [
-    #     {
-    #         **record,
-    #         "uploaded_filename": uploaded_filename,
-    #     }
-    #     for record in records
-    # ]
-
     raw_collection_name = f"dataset_{timestamp}"
     raw_collection = db[raw_collection_name]
 
     try:
+        records = df.to_dict(orient="records")
         inserted = raw_collection.insert_many(records)
     except Exception as e:
         return JSONResponse({"error": f"Failed to upload dataset: {str(e)}"}, status_code=500)

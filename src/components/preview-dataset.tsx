@@ -18,19 +18,19 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import {
-	Pagination,
-	PaginationContent,
-	PaginationItem,
-	PaginationLink,
-	PaginationNext,
-	PaginationPrevious,
-} from "@/components/ui/pagination";
 import { ArrowRight, BarChart2, FileSpreadsheet, Filter } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Navbar } from "@/components/navbar";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface Dataset {
 	columns: string[];
@@ -39,18 +39,29 @@ interface Dataset {
 
 export default function PreviewDataset() {
 	const [dataset, setDataset] = useState<Dataset | null>(null);
-	const [datasetName, setDatasetName] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
+	const [pageSize, setPageSize] = useState(10);
 	const [searchTerm, setSearchTerm] = useState("");
 	const [loading, setLoading] = useState(true);
-	const rowsPerPage = 10;
+	const [fileName, setFileName] = useState<string>("");
 	const searchParams = useSearchParams();
 	const collection = searchParams?.get("collection");
+	const filenameParam = searchParams?.get("file_name");
+	const router = useRouter();
 
 	useEffect(() => {
+		if (!collection) {
+			router.push("/upload-dataset");
+			return;
+		}
+
+		if (filenameParam) {
+			setFileName(filenameParam);
+		}
+
 		const fetchDataset = async (collectionName: string) => {
 			try {
-				setLoading(true)
+				setLoading(true);
 				const response = await fetch(
 					`http://127.0.0.1:8000/dataset/${collectionName}`
 				);
@@ -61,6 +72,8 @@ export default function PreviewDataset() {
 				}
 				const result = await response.json();
 				console.log("Fetched data:", result);
+				console.log("File name:", filenameParam);
+				console.log("Collection name:", collectionName);
 
 				if (!Array.isArray(result?.dataset)) {
 					console.error("Invalid dataset structure:", result);
@@ -79,7 +92,7 @@ export default function PreviewDataset() {
 				);
 
 				setDataset({ columns, data });
-				setDatasetName(collectionName)
+				setFileName(filenameParam || "Dataset Preview");
 			} catch (error) {
 				console.error("Error fetching dataset:", error);
 			} finally {
@@ -90,7 +103,7 @@ export default function PreviewDataset() {
 		if (collection) {
 			fetchDataset(collection as string);
 		}
-	}, [collection]);
+	}, [collection, filenameParam]);
 
 	if (loading || !dataset) {
 		return (
@@ -118,16 +131,25 @@ export default function PreviewDataset() {
 		)
 	);
 
-	const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+	const totalPages = Math.ceil(filteredRows.length / pageSize);
 
 	const paginatedRows = filteredRows.slice(
-		(currentPage - 1) * rowsPerPage,
-		currentPage * rowsPerPage
+		(currentPage - 1) * pageSize,
+		currentPage * pageSize
 	);
 
-	// Calculate basic statistics for numerical columns
+	const visiblePageNumbers = () => {
+		const maxButtons = 5;
+		let start = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+		let end = start + maxButtons - 1;
+		if (end > totalPages) {
+			end = totalPages;
+			start = Math.max(1, end - maxButtons + 1);
+		}
+		return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+	};
+
 	const statistics = dataset.columns.map((column, colIndex) => {
-		// Check if column is numerical by examining the first few values
 		const sampleValues = dataset.data
 			.slice(0, 10)
 			.map((row) => row[colIndex]);
@@ -142,8 +164,6 @@ export default function PreviewDataset() {
 		const max = Math.max(...values);
 		const sum = values.reduce((acc, val) => acc + val, 0);
 		const mean = sum / values.length;
-
-		// Calculate standard deviation
 		const squaredDiffs = values.map((val) => Math.pow(val - mean, 2));
 		const variance =
 			squaredDiffs.reduce((acc, val) => acc + val, 0) / values.length;
@@ -167,14 +187,15 @@ export default function PreviewDataset() {
 					<div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
 						<div>
 							<h1 className="text-3xl font-bold tracking-tight">
-								{datasetName}
+								{fileName}
 							</h1>
 							<p className="text-muted-foreground">
 								{dataset.data.length} rows,{" "}
 								{dataset.columns.length} columns
 							</p>
 						</div>
-						<Link href={`/features-selection?collection=${collection}`}>
+						<Link
+							href={`/features-selection?collection=${collection}&file_name=${fileName}`}>
 							<Button>
 								Continue to Feature Selection{" "}
 								<ArrowRight className="ml-2 h-4 w-4" />
@@ -202,11 +223,39 @@ export default function PreviewDataset() {
 										placeholder="Search data..."
 										className="w-full pl-8"
 										value={searchTerm}
-										onChange={(e) =>
-											setSearchTerm(e.target.value)
-										}
+										onChange={(e) => {
+											setSearchTerm(e.target.value);
+											setCurrentPage(1);
+										}}
 									/>
 								</div>
+							</div>
+
+							<div className="flex items-center gap-2 ml-auto mb-4">
+								<Label
+									htmlFor="rows-per-page"
+									className="text-sm font-medium">
+									Rows per page
+								</Label>
+								<Select
+									onValueChange={(val) => {
+										setPageSize(parseInt(val));
+										setCurrentPage(1);
+									}}
+									value={pageSize.toString()}>
+									<SelectTrigger className="w-20">
+										<SelectValue placeholder="Rows" />
+									</SelectTrigger>
+									<SelectContent>
+										{[10, 25, 50, 100].map((num) => (
+											<SelectItem
+												key={num}
+												value={num.toString()}>
+												{num}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
 							</div>
 
 							<div className="border rounded-md overflow-auto">
@@ -236,95 +285,67 @@ export default function PreviewDataset() {
 								</Table>
 							</div>
 
-							<div className="mt-4">
-								<Pagination>
-									<PaginationContent>
-										<PaginationItem>
-											<PaginationPrevious
-												onClick={() =>
-													setCurrentPage((prev) =>
-														Math.max(prev - 1, 1)
-													)
-												}
-												className={
-													currentPage === 1
-														? "pointer-events-none opacity-50"
-														: ""
-												}
-											/>
-										</PaginationItem>
-										{Array.from(
-											{ length: Math.min(totalPages, 5) },
-											(_, i) => {
-												// Show pages around current page
-												let pageNum = i + 1;
-												if (totalPages > 5) {
-													if (currentPage > 3) {
-														pageNum =
-															currentPage - 3 + i;
-													}
-													if (
-														pageNum >
-															totalPages - 4 &&
-														i < 5
-													) {
-														pageNum =
-															totalPages - 4 + i;
-													}
-												}
-												return (
-													<PaginationItem
-														key={pageNum}>
-														<PaginationLink
-															isActive={
-																pageNum ===
-																currentPage
-															}
-															onClick={() =>
-																setCurrentPage(
-																	pageNum
-																)
-															}>
-															{pageNum}
-														</PaginationLink>
-													</PaginationItem>
-												);
-											}
-										)}
-										<PaginationItem>
-											<PaginationNext
-												onClick={() =>
-													setCurrentPage((prev) =>
-														Math.min(
-															prev + 1,
-															totalPages
-														)
-													)
-												}
-												className={
-													currentPage === totalPages
-														? "pointer-events-none opacity-50"
-														: ""
-												}
-											/>
-										</PaginationItem>
-									</PaginationContent>
-								</Pagination>
+							<div className="mt-6 flex flex-wrap gap-2 justify-center">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setCurrentPage(1)}
+									disabled={currentPage === 1}>
+									{"<<"}
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() =>
+										setCurrentPage((prev) =>
+											Math.max(prev - 1, 1)
+										)
+									}
+									disabled={currentPage === 1}>
+									{"<"}
+								</Button>
+
+								{visiblePageNumbers().map((pageNum) => (
+									<Button
+										key={pageNum}
+										variant={
+											pageNum === currentPage
+												? "default"
+												: "outline"
+										}
+										size="sm"
+										onClick={() => setCurrentPage(pageNum)}>
+										{pageNum}
+									</Button>
+								))}
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() =>
+										setCurrentPage((prev) =>
+											Math.min(prev + 1, totalPages)
+										)
+									}
+									disabled={currentPage === totalPages}>
+									{">"}
+								</Button>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() => setCurrentPage(totalPages)}
+									disabled={currentPage === totalPages}>
+									{">>"}
+								</Button>
 							</div>
 						</CardContent>
-						<CardFooter className="flex flex-col sm:flex-row justify-between border-t pt-6 gap-4">
-							<div className="text-sm text-muted-foreground">
+						<CardFooter className="flex sm:flex-row justify-between border-t pt-6 gap-4">
+							<p className=" text-sm text-muted-foreground">
 								Showing {paginatedRows.length} of{" "}
 								{filteredRows.length} rows
-							</div>
-							<div className="flex gap-2">
-								<Link href={`/features-selection?collection=${collection}`}>
-									<Button>
-										Feature Selection{" "}
-										<ArrowRight className="ml-1 h-3 w-3" />
-									</Button>
-								</Link>
-							</div>
+							</p>
+							<p className="text-sm text-muted-foreground">
+								Page {currentPage} of {totalPages}
+							</p>
 						</CardFooter>
 					</Card>
 

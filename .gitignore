@@ -42,10 +42,8 @@ next-env.d.ts
 backend/serviceAccountKey.json
 
 # === Node.js/Next.js ===
-node_modules/
-.next/
+node_modules/*
 dist/
-out/
 .env
 .env.local
 .env.*.local
@@ -60,12 +58,12 @@ package-lock.json
 Thumbs.db
 
 # === Editor configs ===
-.vscode/
-.idea/
+.vscode/*
+.idea/*
 *.swp
 
 # === Build and cache ===
-.cache/
-.mypy_cache/
-.pytest_cache/
+.cache/*
+.mypy_cache/*
+.pytest_cache/*
 .hintrc
