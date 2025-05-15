@@ -35,7 +35,7 @@ export default function FeatureSelectionComponent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const collectionName = searchParams?.get("collection");
-
+	const filenameParam = searchParams?.get("file_name");
 	const [featureData, setFeatureData] = useState<FeatureData[]>([]);
 	const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
 	const [target, setTarget] = useState<string | null>(null);
@@ -43,32 +43,39 @@ export default function FeatureSelectionComponent() {
 	const [mode, setMode] = useState<"manual" | "auto">("manual");
 
 	useEffect(() => {
-		async function fetchFeatures() {
-			try {
-				const response = await fetch(
-					`http://127.0.0.1:8000/get-features/${collectionName}`
-				);
-				const data = await response.json();
-				if (!response.ok) throw new Error("Failed to fetch features");
+		if (!collectionName) {
+			router.push("/upload-dataset");
+		} else {
+			async function fetchFeatures() {
+				try {
+					const response = await fetch(
+						`http://127.0.0.1:8000/get-features/${collectionName}`
+					);
+					const data = await response.json();
+					if (!response.ok)
+						throw new Error("Failed to fetch features");
 
-				const parsedFeatures = data.features
-					.filter((f: string) => f !== "uploaded_filename")
-					.map((feature: string) => ({
-						name: feature,
-					}));
+					const parsedFeatures = data.features
+						.filter((f: string) => f !== "uploaded_filename")
+						.map((feature: string) => ({
+							name: feature,
+						}));
 
-				setFeatureData(parsedFeatures);
-				setSelectedFeatures(parsedFeatures.map((f: FeatureData) => f.name));
-				if (parsedFeatures.length > 0) {
-					setTarget(parsedFeatures[0].name);
+					setFeatureData(parsedFeatures);
+					setSelectedFeatures(
+						parsedFeatures.map((f: FeatureData) => f.name)
+					);
+					if (parsedFeatures.length > 0) {
+						setTarget(parsedFeatures[0].name);
+					}
+				} catch (error) {
+					console.error("Error fetching features:", error);
+				} finally {
+					setLoading(false);
 				}
-			} catch (error) {
-				console.error("Error fetching features:", error);
-			} finally {
-				setLoading(false);
 			}
+			if (collectionName) fetchFeatures();
 		}
-		if (collectionName) fetchFeatures();
 	}, [collectionName]);
 
 	const handleFeatureToggle = (featureName: string) => {
@@ -111,7 +118,9 @@ export default function FeatureSelectionComponent() {
 				return;
 			}
 			const processedCollection = data.processed_collection;
-			router.push(`/training?collection=${processedCollection}`);
+			router.push(
+				`/training?collection=${processedCollection}&file_name=${filenameParam}`
+			);
 		} catch (error) {
 			console.error("Error during preprocessing:", error);
 		}
@@ -158,8 +167,7 @@ export default function FeatureSelectionComponent() {
 								onValueChange={(val) =>
 									setMode(val as "manual" | "auto")
 								}
-								className="flex gap-6"
-							>
+								className="gap-6">
 								<div>
 									<RadioGroupItem value="manual" id="manual" />
 									<Label htmlFor="manual" className="ml-2">
@@ -181,8 +189,7 @@ export default function FeatureSelectionComponent() {
 										{featureData.map((feature, index) => (
 											<div
 												key={`${feature.name}-${index}`}
-												className="flex items-center justify-between p-3 border rounded-lg"
-											>
+												className="flex items-center justify-between p-3 border rounded-lg">
 												<div className="flex items-center gap-3">
 													<Checkbox
 														id={`manual-${feature.name}`}
@@ -190,7 +197,8 @@ export default function FeatureSelectionComponent() {
 															selectedFeatures.includes(
 																feature.name
 															) &&
-															feature.name !== target
+															feature.name !==
+																target
 														}
 														onCheckedChange={() =>
 															handleFeatureToggle(
@@ -198,13 +206,13 @@ export default function FeatureSelectionComponent() {
 															)
 														}
 														disabled={
-															feature.name === target
+															feature.name ===
+															target
 														}
 													/>
 													<Label
 														htmlFor={`manual-${feature.name}`}
-														className="font-medium"
-													>
+														className="font-medium">
 														{feature.name}
 													</Label>
 												</div>
@@ -227,7 +235,9 @@ export default function FeatureSelectionComponent() {
 											{selectedFeatures.length === 0
 												? "Please select at least one feature to continue."
 												: `You've selected: ${selectedFeatures
-														.filter((f) => f !== target)
+														.filter(
+															(f) => f !== target
+														)
 														.join(", ")}`}
 										</p>
 									</div>
@@ -236,19 +246,19 @@ export default function FeatureSelectionComponent() {
 									<div className="rounded-md bg-muted p-4">
 										<Label
 											htmlFor="target-select"
-											className="font-medium"
-										>
+											className="font-medium">
 											Select Target Column
 										</Label>
 										<Select
 											onValueChange={(val) => {
 												setTarget(val);
 												setSelectedFeatures((prev) =>
-													prev.filter((f) => f !== val)
+													prev.filter(
+														(f) => f !== val
+													)
 												);
 											}}
-											value={target || ""}
-										>
+											value={target || ""}>
 											<SelectTrigger id="target-select">
 												<SelectValue placeholder="Choose target column" />
 											</SelectTrigger>
@@ -257,8 +267,9 @@ export default function FeatureSelectionComponent() {
 													(feature, index) => (
 														<SelectItem
 															key={`${feature.name}-${index}`}
-															value={feature.name}
-														>
+															value={
+																feature.name
+															}>
 															{feature.name}
 														</SelectItem>
 													)
@@ -273,15 +284,16 @@ export default function FeatureSelectionComponent() {
 						<CardFooter className="flex flex-col sm:flex-row justify-between border-t pt-6 gap-4">
 							<Button variant="outline" asChild>
 								<Link
-									href={`/upload-dataset?collection=${collectionName}`}
-								>
+									href={`/upload-dataset?collection=${collectionName}`}>
 									Back to Upload
 								</Link>
 							</Button>
 							<Button
 								onClick={handleContinue}
-								disabled={mode === "manual" && (!target || selectedFeatures.length === 0)}
-							>
+								disabled={
+									mode === "manual" &&
+									(!target || selectedFeatures.length === 0)
+								}>
 								Continue to Model Training{" "}
 								<ArrowRight className="ml-2 h-4 w-4" />
 							</Button>

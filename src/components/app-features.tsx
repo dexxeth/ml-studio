@@ -15,10 +15,10 @@ const Features = () => {
 					"Feature Engineering",
 				].map((feature, index) => (
 					<Card
-						onClick={() => router.push("/upload")}
+						onClick={() => router.push("/upload-dataset")}
 						key={index}
-						className="w-full h-52 flex items-center justify-center 
-                        transition duration-300 shadow-lg 
+						className="w-full h-52 flex items-center justify-center
+                        transition duration-300 shadow-lg
                         hover:shadow-2xl hover:shadow-violet-500">
 						<CardContent className="text-center text-lg font-semibold p-6">
 							{feature}

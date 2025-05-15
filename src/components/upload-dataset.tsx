@@ -47,19 +47,20 @@ export default function UploadDatasetComponent() {
 		setUploading(true);
 		setError(null);
 
-		const formData = new FormData();
-		formData.append("file", file);
-
 		try {
+			const formData = new FormData();
+			formData.append("file", file);
+
 			const response = await fetch("http://127.0.0.1:8000/upload", {
 				method: "POST",
 				body: formData,
 			});
+
 			const result = await response.json();
 
 			if (response.ok) {
 				alert(result.message);
-				router.push(`/preview-dataset?collection=${result.raw_collection}`);
+				router.push(`/preview-dataset?collection=${result.raw_collection}&file_name=${result.file_name}`);
 			} else {
 				setError(result.error || "Upload failed");
 			}

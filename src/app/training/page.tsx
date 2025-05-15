@@ -1,4 +1,4 @@
-import TrainingPageComponent from "@/components/training"
+import TrainingPageComponent from "@/components/training/training"
 
 const TrainingPage = () => {
   return (
