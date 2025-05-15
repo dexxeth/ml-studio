@@ -39,7 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-backend/serviceAccountKey.json
+
 
 # === Node.js/Next.js ===
 node_modules/*
