@@ -15,13 +15,15 @@ export const AutoModelCard = ({
 	isTraining,
 }: Props) => {
 	return (
-		<Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+		<Card className="bg-card/50 backdrop-blur-sm">
 			<CardHeader className="pb-3">
 				<CardTitle className="text-lg">Auto Model Selection</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center justify-between">
-					<Label htmlFor="auto-model-selection">Enable Auto Selection</Label>
+					<Label htmlFor="auto-model-selection">
+						Enable Auto Selection
+					</Label>
 					<Switch
 						id="auto-model-selection"
 						checked={autoModelSelection}

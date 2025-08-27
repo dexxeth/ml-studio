@@ -1,0 +1,9 @@
+FastAPI
+uvicorn
+pydantic
+bson
+pandas
+scikit-learn
+numpy
+pymongo
+dotenv

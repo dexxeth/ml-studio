@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { BrainCircuit, Menu } from "lucide-react";
+import { BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -18,27 +18,29 @@ export function Navbar() {
 	return (
 		<div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
 			<div className="flex h-16 items-center px-4 container mx-auto">
-				<nav className="hidden md:flex items-center space-x-6 ml-10">
+				<div className="hidden md:flex">
 					<Link href="/">
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 mx-4">
 							<BrainCircuit className="h-6 w-6" />
 							<span className="font-bold text-xl">ML Studio</span>
 						</div>
 					</Link>
 
-					{routes.map((route) => (
-						<span
-							key={route.href}
-							className={cn(
-								"text-sm font-medium transition-colors",
-								pathname.startsWith(route.href)
-									? "text-foreground font-semibold"
-									: "text-muted-foreground"
-							)}>
-							{route.label}
-						</span>
-					))}
-				</nav>
+					<nav className="hidden md:flex items-center space-x-6 ml-auto">
+						{routes.map((route) => (
+							<span
+								key={route.href}
+								className={cn(
+									"text-sm font-medium transition-colors",
+									pathname.startsWith(route.href)
+										? "text-foreground font-semibold"
+										: "text-muted-foreground"
+								)}>
+								{route.label}
+							</span>
+						))}
+					</nav>
+				</div>
 
 				<div className="flex items-center ml-auto space-x-4 text-xs md:hidden">
 					<Link href="/">
@@ -47,7 +49,8 @@ export function Navbar() {
 							<span className="font-bold">ML Studio</span>
 						</div>
 					</Link>
-					<nav className="flex font-medium text-muted-foreground ml-4">
+
+					<nav className="flex font-medium text-muted-foreground ml-auto">
 						{routes.map((route) => (
 							<span
 								key={route.href}

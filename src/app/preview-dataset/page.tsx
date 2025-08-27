@@ -1,4 +1,4 @@
-import PreviewDataset from "@/components/preview-dataset";
+import PreviewDataset from "@/components/dataset-preview/preview-dataset";
 
 const DatasetPage = () => {
 	return (

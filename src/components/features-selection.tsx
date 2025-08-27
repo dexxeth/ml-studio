@@ -153,7 +153,7 @@ export default function FeatureSelectionComponent() {
 						Feature Selection
 					</h1>
 
-					<Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+					<Card className="bg-card/50 backdrop-blur-sm">
 						<CardHeader>
 							<CardTitle>Preprocessing Mode</CardTitle>
 							<CardDescription>
@@ -168,13 +168,16 @@ export default function FeatureSelectionComponent() {
 									setMode(val as "manual" | "auto")
 								}
 								className="gap-6">
-								<div>
-									<RadioGroupItem value="manual" id="manual" />
+								<div className="flex items-center">
+									<RadioGroupItem
+										value="manual"
+										id="manual"
+									/>
 									<Label htmlFor="manual" className="ml-2">
 										Manual Feature & Target Selection
 									</Label>
 								</div>
-								<div>
+								<div className="flex items-center">
 									<RadioGroupItem value="auto" id="auto" />
 									<Label htmlFor="auto" className="ml-2">
 										Automatic Feature & Target Detection
@@ -234,7 +237,7 @@ export default function FeatureSelectionComponent() {
 										<p className="text-sm text-muted-foreground">
 											{selectedFeatures.length === 0
 												? "Please select at least one feature to continue."
-												: `You've selected: ${selectedFeatures
+												: ` ${selectedFeatures
 														.filter(
 															(f) => f !== target
 														)
@@ -283,8 +286,7 @@ export default function FeatureSelectionComponent() {
 
 						<CardFooter className="flex flex-col sm:flex-row justify-between border-t pt-6 gap-4">
 							<Button variant="outline" asChild>
-								<Link
-									href={`/upload-dataset?collection=${collectionName}`}>
+								<Link href={"/upload-dataset"}>
 									Back to Upload
 								</Link>
 							</Button>

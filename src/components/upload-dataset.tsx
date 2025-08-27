@@ -60,7 +60,9 @@ export default function UploadDatasetComponent() {
 
 			if (response.ok) {
 				alert(result.message);
-				router.push(`/preview-dataset?collection=${result.raw_collection}&file_name=${result.file_name}`);
+				router.push(
+					`/preview-dataset?collection=${result.raw_collection}&file_name=${result.file_name}`
+				);
 			} else {
 				setError(result.error || "Upload failed");
 			}
@@ -80,7 +82,7 @@ export default function UploadDatasetComponent() {
 					<h1 className="text-3xl font-bold tracking-tight mb-6">
 						Upload Dataset
 					</h1>
-					<Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+					<Card className=" bg-card/50 backdrop-blur-sm">
 						<CardHeader>
 							<CardTitle>Upload your dataset</CardTitle>
 							<CardDescription>

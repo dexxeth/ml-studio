@@ -1,10 +1,5 @@
 "use client";
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
 	Select,
 	SelectTrigger,
@@ -27,7 +22,7 @@ export const ModelTypeCard = ({
 	isTraining,
 }: Props) => {
 	return (
-		<Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+		<Card className="bg-card/50 backdrop-blur-sm">
 			<CardHeader className="pb-3">
 				<CardTitle className="text-lg">Model Type</CardTitle>
 			</CardHeader>
@@ -35,15 +30,20 @@ export const ModelTypeCard = ({
 				<Select
 					value={modelType}
 					onValueChange={setModelType}
-					disabled={isTraining || autoModelSelection}
-				>
+					disabled={isTraining || autoModelSelection}>
 					<SelectTrigger>
 						<SelectValue placeholder="Select model type" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="random_forest">Random Forest</SelectItem>
-						<SelectItem value="linear_regression">Linear Regression</SelectItem>
-						<SelectItem value="svm">Support Vector Machine</SelectItem>
+						<SelectItem value="random_forest">
+							Random Forest
+						</SelectItem>
+						<SelectItem value="linear_regression">
+							Linear Regression
+						</SelectItem>
+						<SelectItem value="svm">
+							Support Vector Machine
+						</SelectItem>
 						<SelectItem value="k_means">K Means</SelectItem>
 					</SelectContent>
 				</Select>

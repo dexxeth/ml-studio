@@ -7,7 +7,9 @@ import { ModelTypeCard } from "@/components/training/model-type-card";
 import { ProgressTracker } from "@/components/training/model-progress";
 import { ModelResultsCard } from "@/components/training/model-results-card";
 import { DownloadModelButton } from "@/components/download-model-button";
-import { Card } from "../ui/card";
+import { Card, CardFooter } from "../ui/card";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 interface ModelResults {
 	accuracy: number;

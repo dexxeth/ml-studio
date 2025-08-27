@@ -10,7 +10,7 @@ interface ModelResults {
 
 export const ModelResultsCard = ({ metrics }: { metrics: ModelResults }) => {
 	return (
-		<Card className="border-border/40 bg-card/50 backdrop-blur-sm">
+		<Card className="bg-card/50 backdrop-blur-sm">
 			<CardHeader>
 				<CardTitle className="text-lg">Model Performance</CardTitle>
 			</CardHeader>

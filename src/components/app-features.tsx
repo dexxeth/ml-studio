@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent } from "./ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 
-const Features = () => {
+const AppFeatures = () => {
 	const router = useRouter();
 	return (
 		<div className="relative flex flex-col items-center justify-center px-4 py-8">
@@ -19,7 +19,7 @@ const Features = () => {
 						key={index}
 						className="w-full h-52 flex items-center justify-center
                         transition duration-300 shadow-lg
-                        hover:shadow-2xl hover:shadow-violet-500">
+                        hover:shadow-2xl hover:shadow-violet-500 hover:cursor-pointer">
 						<CardContent className="text-center text-lg font-semibold p-6">
 							{feature}
 						</CardContent>
@@ -30,4 +30,4 @@ const Features = () => {
 	);
 };
 
-export default Features;
+export default AppFeatures;
